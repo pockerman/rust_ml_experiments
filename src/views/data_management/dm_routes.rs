@@ -93,15 +93,4 @@ pub async fn upload_dataset_file(payload: Multipart,
 	                              file_path).await;
 
 	upload_status
-    /*match upload_status {
-        Some(true) => {
-
-            Ok(HttpResponse::Ok()
-                .content_type("text/plain")
-                .body("update_succeeded"))
-        }
-        _ => Ok(HttpResponse::BadRequest()
-            .content_type("text/plain")
-            .body("update_failed")),
-    }*/
 }

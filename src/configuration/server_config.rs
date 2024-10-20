@@ -8,6 +8,5 @@ pub fn get_server_config() -> ServerConfig{
 		port:8080,
 		host: String::from("127.0.0.1")
 	};
-	config
-	
+	config	
 }
