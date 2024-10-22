@@ -15,3 +15,10 @@ futures =  "0.3.31"
 tokio = { version = "1.17.0", features = ["full"] }
 serde = {version = "1.0.200", features = ["derive"] }
 
+[dependencies.mongodb]
+version = "3.1.0"
+
+# optionally we can have sync 
+# see: https://www.mongodb.com/docs/drivers/rust/current/quick-start/download-and-install/
+# features = ["sync"]
+

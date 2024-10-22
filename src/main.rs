@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, middleware::Logger};
 mod configuration;
 use configuration::server_config::get_server_config;
 mod views;
@@ -19,7 +19,9 @@ async fn main() -> std::io::Result<()>{
 	let config = get_server_config();
 	let server_config = (config.host, config.port);
     HttpServer::new(|| {
-        let app = App::new().configure(views::views_factory);
+        let app = App::new()
+		.wrap(Logger::new("%a %{User-Agent}i"))
+		.configure(views::views_factory);
         return app
     })
     .bind(server_config)?
