@@ -6,7 +6,7 @@ struct Info {
     username: String,
 }
 
-/// Upload a file defining a dataset to the user
+
 /// specified space
 //#[get("/index")]
 async fn get_index(info: web::Path<Info>) -> Result<HttpResponse, actix_web::error::Error> {

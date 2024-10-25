@@ -12,12 +12,12 @@ async fn main() -> std::io::Result<()>{
     
 	let config = get_server_config();
 	
-	let app_url = config.host + ":" + &config.port.to_string();
+	let app_url = config.HOST + ":" + &config.PORT.to_string();
 	
 	println!("Starting application on {}", app_url);
 	
 	let config = get_server_config();
-	let server_config = (config.host, config.port);
+	let server_config = (config.HOST, config.PORT);
     HttpServer::new(|| {
         let app = App::new()
 		.wrap(Logger::new("%a %{User-Agent}i"))

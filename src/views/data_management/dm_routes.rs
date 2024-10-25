@@ -1,8 +1,10 @@
 use futures::{StreamExt};
 use actix_multipart::Multipart;
 use actix_files;
-use actix_web::{web, post, HttpResponse};
+use actix_web::{web, post, get, HttpResponse};
 use tokio::io::AsyncWriteExt;
+use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
+use dm_queries::{DatasetSearchQuery};
 
 
 
@@ -10,6 +12,7 @@ use tokio::io::AsyncWriteExt;
 struct TemplateInfo {
     name: Option<String>,
 }
+
 
 
 pub async fn serve_directory_listing(path: web::Path<String>) -> HttpResponse {
@@ -34,7 +37,7 @@ pub async fn serve_directory_listing(path: web::Path<String>) -> HttpResponse {
 pub fn init(cfg: &mut web::ServiceConfig){
 	
 	
-	cfg
+	/*cfg
         .service(upload_dataset_file)
         .service(web::scope("/dm/")
                 .service(actix_files::Files::new("/", "./assets").show_files_listing())
@@ -44,6 +47,9 @@ pub fn init(cfg: &mut web::ServiceConfig){
                 .service(actix_files::Files::new("/", "./templates").show_files_listing())
                 .default_service(web::route().to(serve_directory_listing)),
         );*/
+		
+	cfg.service(web::resource("/v1/dm/datasets/{id}")
+	           .route(web::get().to(get_dataset_info)));*/
 
 	
 }
@@ -93,4 +99,12 @@ pub async fn upload_dataset_file(payload: Multipart,
 	                              file_path).await;
 
 	upload_status
+}
+
+/// Get the dataset information
+#[get("/dm/datasets/{id}/info")]
+pub async fn get_dataset_info(query: web::Query<DatasetSearchQuery>,
+                              conn: web::Data<Client>) -> Result<HttpResponse, actix_web::error::Error>{
+	
+	
 }
