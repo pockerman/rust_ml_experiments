@@ -3,8 +3,11 @@ use actix_multipart::Multipart;
 use actix_files;
 use actix_web::{web, post, get, HttpResponse};
 use tokio::io::AsyncWriteExt;
+use serde::{Deserialize, Serialize};
 use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
-use dm_queries::{DatasetSearchQuery};
+//use dm_queries::{DatasetSearchQuery};
+
+use crate configuration::server_config::get_server_config;
 
 
 
@@ -14,8 +17,26 @@ struct TemplateInfo {
 }
 
 
+#[derive(serde::Deserialize)]
+struct DatasetSearchQuery {
+    id: Option<String>,
+}
 
-pub async fn serve_directory_listing(path: web::Path<String>) -> HttpResponse {
+
+
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct User {
+    pub first_name: String,
+    pub last_name: String,
+    pub username: String,
+    pub email: String,
+}
+
+
+
+
+/*pub async fn serve_directory_listing(path: web::Path<String>) -> HttpResponse {
     let directory = format!("./{}", path);
     match tokio::fs::read_dir(&directory).await {
         Ok(mut entries) => {
@@ -30,7 +51,7 @@ pub async fn serve_directory_listing(path: web::Path<String>) -> HttpResponse {
         }
         Err(_) => HttpResponse::NotFound().finish(),
     }
-}
+}*/
 
 
 
@@ -47,14 +68,13 @@ pub fn init(cfg: &mut web::ServiceConfig){
                 .service(actix_files::Files::new("/", "./templates").show_files_listing())
                 .default_service(web::route().to(serve_directory_listing)),
         );*/
-		
-	cfg.service(web::resource("/v1/dm/datasets/{id}")
-	           .route(web::get().to(get_dataset_info)));*/
+		*/
+	cfg.service(get_dataset_info);
 
 	
 }
 
-pub async fn save_file(mut payload: Multipart, 
+/*pub async fn save_file(mut payload: Multipart, 
                        file_path: std::path::PathBuf) -> Result<HttpResponse, actix_web::error::Error> {
 						   
 		let mut file = tokio::fs::File::create(file_path).await?;
@@ -84,11 +104,11 @@ pub async fn save_file(mut payload: Multipart,
 		
 		Ok(HttpResponse::Ok().body("File saved successfully"))
     }
-
+*/
 
 /// Upload a file defining a dataset to the user
 /// specified space
-#[post("/upload-ds-file")]
+/*#[post("/upload-ds-file")]
 pub async fn upload_dataset_file(payload: Multipart,
                                 info: web::Query<TemplateInfo>) -> Result<HttpResponse, actix_web::error::Error> {
   
@@ -99,12 +119,28 @@ pub async fn upload_dataset_file(payload: Multipart,
 	                              file_path).await;
 
 	upload_status
-}
+}*/
 
 /// Get the dataset information
 #[get("/dm/datasets/{id}/info")]
 pub async fn get_dataset_info(query: web::Query<DatasetSearchQuery>,
                               conn: web::Data<Client>) -> Result<HttpResponse, actix_web::error::Error>{
+								  
+								  
+	let config = get_server_config();
+	// Get a handle on the movies collection
+    //let database = client.database("rust-ml-experiment");
+	let DB_NAME: &str = config.db_name;
+    const COLL_NAME: &str = "users";
+	
+    //let my_coll: Collection<Document> = database.collection("datasets");
+	
+	let collection: Collection<User> = conn.database(DB_NAME).collection(COLL_NAME);
+	
+    // Find a movie based on the title value
+    //let my_movie = my_coll.find_one(doc! { "title": "The Perils of Pauline" }).await?;
+								  
+	Ok(HttpResponse::Ok().body("Here is the dataset"))
 	
 	
 }
