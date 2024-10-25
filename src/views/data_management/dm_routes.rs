@@ -5,9 +5,9 @@ use actix_web::{web, post, get, HttpResponse};
 use tokio::io::AsyncWriteExt;
 use serde::{Deserialize, Serialize};
 use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
-//use dm_queries::{DatasetSearchQuery};
 
-use crate configuration::server_config::get_server_config;
+use crate::configuration;
+//use configuration::server_config::get_server_config;
 
 
 
@@ -127,15 +127,15 @@ pub async fn get_dataset_info(query: web::Query<DatasetSearchQuery>,
                               conn: web::Data<Client>) -> Result<HttpResponse, actix_web::error::Error>{
 								  
 								  
-	let config = get_server_config();
+	let config = configuration::server_config::get_server_config();
 	// Get a handle on the movies collection
     //let database = client.database("rust-ml-experiment");
-	let DB_NAME: &str = config.db_name;
+	let db_name: String = config.db_name;
     const COLL_NAME: &str = "users";
 	
     //let my_coll: Collection<Document> = database.collection("datasets");
 	
-	let collection: Collection<User> = conn.database(DB_NAME).collection(COLL_NAME);
+	let collection: Collection<User> = conn.database(&db_name).collection(COLL_NAME);
 	
     // Find a movie based on the title value
     //let my_movie = my_coll.find_one(doc! { "title": "The Perils of Pauline" }).await?;
