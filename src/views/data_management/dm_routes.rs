@@ -1,7 +1,7 @@
 use futures::{StreamExt};
 use actix_multipart::Multipart;
 use actix_files;
-use actix_web::{web, post, get, HttpResponse};
+use actix_web::{web, post, get, HttpResponse, error, Error};
 use tokio::io::AsyncWriteExt;
 use serde::{Deserialize, Serialize};
 use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
@@ -9,7 +9,9 @@ use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
 use crate::configuration;
 //use configuration::server_config::get_server_config;
 
+use super::dm_requests::NewDatasetRequest;	
 
+const MAX_SIZE: usize = 262_144; // max payload size is 256k
 
 #[derive(serde::Deserialize)]
 struct TemplateInfo {
@@ -70,6 +72,7 @@ pub fn init(cfg: &mut web::ServiceConfig){
         );*/
 		*/
 	cfg.service(get_dataset_info);
+	cfg.service(create_dataset);
 
 	
 }
@@ -133,7 +136,39 @@ pub async fn get_dataset_info(query: web::Query<DatasetSearchQuery>,
 	let db_name: String = config.db_name;
     const COLL_NAME: &str = "users";
 	
-    //let my_coll: Collection<Document> = database.collection("datasets");
+	let collection: Collection<User> = conn.database(&db_name).collection(COLL_NAME);
+	
+    // Find a movie based on the title value
+    //let my_movie = my_coll.find_one(doc! { "title": "The Perils of Pauline" }).await?;
+								  
+	Ok(HttpResponse::Ok().body("Here is the dataset"))
+
+}
+
+#[post("/dm/datasets")]
+pub async fn create_dataset(mut payload: web::Payload,
+							conn: web::Data<Client>) -> Result<HttpResponse, actix_web::error::Error>{
+								
+								
+	let mut body = web::BytesMut::new();
+    while let Some(chunk) = payload.next().await {
+        let chunk = chunk?;
+        // limit max size of in-memory payload
+        if (body.len() + chunk.len()) > MAX_SIZE {
+            return Err(error::ErrorBadRequest("overflow"));
+        }
+        body.extend_from_slice(&chunk);
+    }
+
+    // body is loaded, now we can deserialize serde-json
+    let obj = serde_json::from_slice::<NewDatasetRequest>(&body)?;
+								  
+								  
+	let config = configuration::server_config::get_server_config();
+	// Get a handle on the movies collection
+    //let database = client.database("rust-ml-experiment");
+	let db_name: String = config.db_name;
+    const COLL_NAME: &str = "users";
 	
 	let collection: Collection<User> = conn.database(&db_name).collection(COLL_NAME);
 	
@@ -141,6 +176,5 @@ pub async fn get_dataset_info(query: web::Query<DatasetSearchQuery>,
     //let my_movie = my_coll.find_one(doc! { "title": "The Perils of Pauline" }).await?;
 								  
 	Ok(HttpResponse::Ok().body("Here is the dataset"))
-	
-	
+
 }
